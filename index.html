@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sam Pandey - Professional Video Editor</title>
     <meta name="description" content="Portfolio of Sam Pandey, a professional video editor specializing in Adobe Premiere Pro, After Effects, and Photoshop. Crafting visual narratives that captivate and convert.">
-    <!-- TODO: Create a 'favicon.ico' and place it in the root folder. You can generate one from an image using a site like favicon.io -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
-    <!-- Google Fonts for a premium feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -17,9 +15,9 @@
         /* --- Global Styles & CSS Variables --- */
         :root {
             /* Default: Dark Theme */
-            --primary-color: #0a0a0a; /* Pure black for deep contrast */
-            --secondary-color: #1a1a1a; /* Off-black for sections */
-            --accent-color: #007bff; /* A vibrant blue */
+            --primary-color: #0a0a0a;
+            --secondary-color: #1a1a1a;
+            --accent-color: #007bff;
             --text-color: #e0e0e0;
             --text-muted-color: #888;
             --card-bg: #1f1f1f;
@@ -357,11 +355,20 @@
             animation: zoomIn 0.3s ease-out;
             border-radius: 8px;
             overflow: hidden;
+            /* Aspect ratio for the container to hold the video/iframe */
+            aspect-ratio: 16 / 9;
+            height: auto;
+            max-height: 90vh;
         }
         
-        .modal-content video {
-            display: block; width: 100%; height: auto;
-            max-height: 85vh;
+        .modal-content video, .modal-content iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
         }
 
         @keyframes zoomIn {
@@ -524,9 +531,12 @@
     <div id="videoModal" class="modal">
         <div class="modal-content">
             <span class="close-button">×</span>
-            <video id="modalVideoPlayer" width="1920" height="1080" controls autoplay playsinline preload="metadata">
+            <!-- Player for direct video links (.mp4, etc.) -->
+            <video id="modalVideoPlayer" style="display: none;" controls autoplay playsinline preload="metadata">
                 Your browser does not support the video tag.
             </video>
+            <!-- Player for embedded content (Google Drive, etc.) -->
+            <iframe id="modalIframePlayer" style="display: none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -546,12 +556,10 @@
             // --- THEME TOGGLE LOGIC ---
             const themeToggle = document.getElementById('theme-toggle');
             const body = document.body;
-            // Apply saved theme on load
             const savedTheme = localStorage.getItem('theme') || 'dark';
             if (savedTheme === 'light') {
                 body.classList.add('light-theme');
             }
-            // Toggle theme on click
             themeToggle.addEventListener('click', () => {
                 body.classList.toggle('light-theme');
                 const newTheme = body.classList.contains('light-theme') ? 'light' : 'dark';
@@ -560,10 +568,13 @@
 
             // --- DYNAMIC VIDEO DATABASE ---
             // =========================================================================
-            //  EASY EDIT SECTION: Just add or change the video info in this array.
-            //  - channelLogo: Path to a small square image.
-            //  - thumbnail: Path to a 16:9 thumbnail image.
-            //  - videoUrl: Path to your video file in the `videos` folder.
+            //  EASY EDIT SECTION: Add or change video info here.
+            //  The `videoUrl` can be a local path, a direct video link, OR a Google Drive share link.
+            //
+            //  EXAMPLES:
+            //  - Local:           'videos/my-cool-edit.mp4'
+            //  - Direct Link:     'https://example.com/video.mp4'
+            //  - Google Drive:    'https://drive.google.com/file/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/view?usp=sharing'
             // =========================================================================
             const videoData = [
                 {
@@ -571,7 +582,7 @@
                     channelName: 'Wanderlust Films',
                     title: 'Epic Travel Montage - A Journey Through the Alps',
                     thumbnail: 'https://picsum.photos/seed/Thumb1/640/360',
-                    videoUrl: 'videos/sample-video-1.mp4', // <-- EDIT THIS
+                    videoUrl: 'videos/sample-video-1.mp4', // Example: Local File
                     duration: '02:35'
                 },
                 {
@@ -579,7 +590,8 @@
                     channelName: 'TechNow',
                     title: 'Dynamic Product Commercial - The New ChronoWatch',
                     thumbnail: 'https://picsum.photos/seed/Thumb2/640/360',
-                    videoUrl: 'videos/sample-video-2.mp4', // <-- EDIT THIS
+                    // Example: Google Drive Link (replace with a real one)
+                    videoUrl: 'https://drive.google.com/file/d/17Ieg5A6z334R2b-mIeDoTj_x_VjQ9jY/view?usp=sharing', 
                     duration: '00:58'
                 },
                 {
@@ -587,56 +599,110 @@
                     channelName: 'Aura Records',
                     title: 'Aurora - "Echoes in the Rain" (Official Music Video)',
                     thumbnail: 'https://picsum.photos/seed/Thumb3/640/360',
-                    videoUrl: 'videos/sample-video-3.mp4', // <-- EDIT THIS
-                    duration: '04:12'
+                    // Example: Direct Video Link from an external server
+                    videoUrl: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                    duration: '09:56'
                 },
                 {
                     channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
                     channelName: 'Innovate Corp',
                     title: 'Corporate Identity Film - Our Vision for 2025',
                     thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
-                    videoUrl: 'videos/sample-video-4.mp4', // <-- EDIT THIS
+                    videoUrl: 'videos/sample-video-4.mp4',
                     duration: '03:15'
                 },
-                {
-                    channelLogo: 'https://picsum.photos/seed/Channel5/40/40',
-                    channelName: 'Vortex Gaming',
-                    title: 'Insane Valorant Highlights - Ace Compilation',
-                    thumbnail: 'https://picsum.photos/seed/Thumb5/640/360',
-                    videoUrl: 'videos/sample-video-5.mp4', // <-- EDIT THIS
-                    duration: '05:50'
+                 {
+                    channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
+                    channelName: 'Innovate Corp',
+                    title: 'Corporate Identity Film - Our Vision for 2025',
+                    thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
+                    videoUrl: 'videos/sample-video-4.mp4',
+                    duration: '03:15'
+                }, {
+                    channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
+                    channelName: 'Innovate Corp',
+                    title: 'Corporate Identity Film - Our Vision for 2025',
+                    thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
+                    videoUrl: 'videos/sample-video-4.mp4',
+                    duration: '03:15'
+                }, {
+                    channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
+                    channelName: 'Innovate Corp',
+                    title: 'Corporate Identity Film - Our Vision for 2025',
+                    thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
+                    videoUrl: 'videos/sample-video-4.mp4',
+                    duration: '03:15'
+                }, {
+                    channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
+                    channelName: 'Innovate Corp',
+                    title: 'Corporate Identity Film - Our Vision for 2025',
+                    thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
+                    videoUrl: 'videos/sample-video-4.mp4',
+                    duration: '03:15'
+                }, {
+                    channelLogo: 'https://picsum.photos/seed/Channel4/40/40',
+                    channelName: 'Innovate Corp',
+                    title: 'Corporate Identity Film - Our Vision for 2025',
+                    thumbnail: 'https://picsum.photos/seed/Thumb4/640/360',
+                    videoUrl: 'videos/sample-video-4.mp4',
+                    duration: '03:15'
                 },
-                {
-                    channelLogo: 'https://picsum.photos/seed/Channel6/40/40',
-                    channelName: 'Everlasting Moments',
-                    title: 'A Fairytale Wedding - Sarah & Tom',
-                    thumbnail: 'https://picsum.photos/seed/Thumb6/640/360',
-                    videoUrl: 'videos/sample-video-6.mp4', // <-- EDIT THIS
-                    duration: '07:22'
-                },
-                {
-                    channelLogo: 'https://picsum.photos/seed/Channel7/40/40',
-                    channelName: 'Indie Slate',
-                    title: 'Short Film: "The Last Message"',
-                    thumbnail: 'https://picsum.photos/seed/Thumb7/640/360',
-                    videoUrl: 'videos/sample-video-7.mp4', // <-- EDIT THIS
-                    duration: '12:03'
-                },
-                {
-                    channelLogo: 'https://picsum.photos/seed/Channel8/40/40',
-                    channelName: 'Creative Coach',
-                    title: 'Editing Tutorial: The Perfect L-Cut',
-                    thumbnail: 'https://picsum.photos/seed/Thumb8/640/360',
-                    videoUrl: 'videos/sample-video-8.mp4', // <-- EDIT THIS
-                    duration: '08:45'
-                }
             ];
 
             // --- VIDEO CARD & MODAL LOGIC ---
             const videoGallery = document.querySelector('.video-gallery');
             const modal = document.getElementById('videoModal');
             const modalVideoPlayer = document.getElementById('modalVideoPlayer');
+            const modalIframePlayer = document.getElementById('modalIframePlayer');
             const closeButton = document.querySelector('.close-button');
+
+            /**
+             * Analyzes a URL and returns the correct playback type and URL.
+             * @param {string} url The original video URL.
+             * @returns {{type: 'video' | 'iframe', url: string}}
+             */
+            function getPlaybackDetails(url) {
+                // Check for Google Drive links
+                if (url.includes('drive.google.com')) {
+                    // Use a regular expression to extract the file ID
+                    const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        const fileId = match[1];
+                        return {
+                            type: 'iframe',
+                            url: `https://drive.google.com/file/d/${fileId}/preview`
+                        };
+                    }
+                }
+                
+                // Default to a direct video link
+                return { type: 'video', url: url };
+            }
+
+            function openModal(videoUrl) {
+                const playback = getPlaybackDetails(videoUrl);
+
+                if (playback.type === 'iframe') {
+                    modalVideoPlayer.style.display = 'none';
+                    modalIframePlayer.src = playback.url;
+                    modalIframePlayer.style.display = 'block';
+                } else { // 'video'
+                    modalIframePlayer.style.display = 'none';
+                    modalVideoPlayer.src = playback.url;
+                    modalVideoPlayer.style.display = 'block';
+                }
+
+                modal.classList.add('show');
+                body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modalVideoPlayer.pause();
+                modalVideoPlayer.src = "";
+                modalIframePlayer.src = ""; // Also clear the iframe source
+                modal.classList.remove('show');
+                body.style.overflow = '';
+            }
 
             function renderVideoCards() {
                 if (!videoGallery) return;
@@ -664,43 +730,25 @@
                     card.addEventListener('click', () => openModal(video.videoUrl));
                     videoGallery.appendChild(card);
                 });
-                observeElements(); // Re-observe elements after they are created
+                observeElements();
             }
-
-            function openModal(videoUrl) {
-                modalVideoPlayer.src = videoUrl;
-                modal.classList.add('show');
-                body.style.overflow = 'hidden'; // Prevent background scrolling
-            }
-
-            function closeModal() {
-                modalVideoPlayer.pause();
-                modalVideoPlayer.src = ""; // Stop video from loading in background
-                modal.classList.remove('show');
-                body.style.overflow = ''; // Restore scrolling
-            }
-
+            
             closeButton.addEventListener('click', closeModal);
             modal.addEventListener('click', (event) => {
-                if (event.target === modal) closeModal(); // Close if clicking on the background
+                if (event.target === modal) closeModal();
             });
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && modal.classList.contains('show')) closeModal();
             });
 
             // --- SCROLL REVEAL ANIMATION LOGIC ---
-            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
-
-            function handleIntersect(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }
-            
             function observeElements() {
-                const revealObserver = new IntersectionObserver(handleIntersect, observerOptions);
+                const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) entry.target.classList.add('visible');
+                    });
+                }, observerOptions);
                 const revealElements = document.querySelectorAll('.reveal');
                 revealElements.forEach(el => revealObserver.observe(el));
             }
